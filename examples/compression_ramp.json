@@ -1,0 +1,16 @@
+{
+  "description": "Rampa de compresión en superficie inferior",
+  "mach_inf": 2.5,
+  "gamma": 1.4,
+  "side": "lower",
+  "segments": [
+    {
+      "length": 1.0,
+      "angle_deg": 0.0
+    },
+    {
+      "length": 1.5,
+      "angle_deg": 10.0
+    }
+  ]
+}
