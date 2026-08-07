@@ -1,7 +1,7 @@
 {
   "name": "Python 3",
-  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-  "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
+  // Kept at 3.12 to match the Python version DEPLOYMENT.md asks for on Streamlit Cloud.
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
   "customizations": {
     "codespaces": {
       "openFiles": [

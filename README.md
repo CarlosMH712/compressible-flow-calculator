@@ -1,29 +1,58 @@
-# Compressible Flow Calculator — Version 3
+# Compressible Flow Calculator
 
-Academic Streamlit application for Aerodynamics II, developed to accompany the lecture collection at Carlos Molina's academic portal.
+Academic Streamlit application for **Aerodynamics II**, developed to accompany
+the lecture collection at Carlos Molina's academic portal. It covers the
+standard atmosphere, isentropic flow, shocks, Prandtl–Meyer expansions, Pitot
+measurement, and sequential shock–expansion geometry.
 
-## Version 3 improvements
+This is the repository whose structure, unit system, and visual language the
+rest of the portal's calculators follow:
+[nozzle-calculator](https://github.com/CarlosMH712/nozzle-calculator),
+[turbofan-calculator](https://github.com/CarlosMH712/turbofan-calculator),
+[turbojet-calculator](https://github.com/CarlosMH712/turbojet-calculator) and
+[ramjet-calculator](https://github.com/CarlosMH712/ramjet-calculator).
 
-- Global **SI / U.S. customary** unit selector.
-- Practical pressure units: Pa, kPa, bar, atm, psi, and psf.
-- Temperature display in K, °C, °R, or °F.
-- New **U.S. Standard Atmosphere 1976** calculator through 84.852 km geopotential altitude.
-- More complete isentropic equation summary and critical-property ratios.
-- Six-decimal area-ratio input so values such as `1.507` remain visible and are not displayed as `1.51`.
-- Mach angle shown only for supersonic states, with its physical interpretation.
-- Normal-shock module now reports absolute downstream pressure, temperature, density, and speed of sound.
-- Pitot measurement moved to an independent module to distinguish `p2` from the measured stagnation pressure `p02`.
-- Oblique-shock outputs now include both `Mn1` and `Mn2`.
-- Anderson-style theta-beta-M chart: theta on the horizontal axis, beta on the vertical axis, and constant-Mach curves.
-- Prandtl-Meyer outputs now include Mach angles `mu1` and `mu2` and explain how property ratios are obtained from isentropic relations.
-- Geometry results separated into a state table and a wave-details table.
-- Pitot placement selected by **flow region** rather than a raw segment number.
-- Separate Pitot diagnostic schematic to avoid confusing the local probe shock with the external wave pattern.
-- 17 automated tests.
+## Main modules
+
+1. U.S. Standard Atmosphere 1976
+2. Isentropic flow
+3. Normal shock
+4. Compressible Pitot measurement
+5. Oblique shock
+6. Prandtl–Meyer expansion
+7. Sequential shock–expansion geometry
+
+## Two things that are easy to get wrong
+
+**A Pitot probe does not measure `p₂`.** In supersonic flow it reads `p₀₂`, after
+the local normal shock and the subsequent isentropic deceleration. The Pitot
+calculation lives in its own module for exactly this reason, and in the geometry
+module the probe's shock is a local diagnostic branch that does not alter the
+external state propagated to later panels.
+
+**The Mach angle is a supersonic quantity.** It is shown only for `M ≥ 1`,
+because it describes the inclination of an infinitesimal Mach wave. A subsonic
+disturbance is not confined to a Mach cone, so a number there would be
+meaningless rather than merely unused.
+
+## Adjustable gas constant
+
+`R` is a sidebar parameter, default 287.05287 J/(kg·K), so the same relations can
+be run on helium, argon, or combustion products — remembering to change γ too.
+
+It reaches only what actually depends on it: density and speed of sound. Every
+core module returns **ratios**, so β, `Mₙ₁`, `p₂/p₁`, `ν` and the rest are
+untouched by `R` — and a test enforces that, so that adding a gas constant to a
+core module cannot silently bypass the sidebar.
+
+The atmosphere tab is the deliberate exception: it always uses 287.05287,
+because that value is part of the definition of the 1976 standard rather than a
+property of the air being modelled. Changing it there would contradict the model
+rather than generalise it. The app says so on the tab.
 
 ## Quick start on macOS
 
-After extracting the ZIP, double-click:
+Double-click:
 
 ```text
 run_calculator.command
@@ -31,12 +60,12 @@ run_calculator.command
 
 The script creates `.venv`, installs missing packages, and starts Streamlit.
 
-If macOS blocks the first launch, right-click the file, choose **Open**, and confirm.
+If macOS blocks the first launch, right-click the file, choose **Open**, and
+confirm.
 
 ## Manual start
 
 ```bash
-cd "/path/to/compressible_flow_calculator_v3"
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
@@ -53,28 +82,38 @@ python -m pytest -q
 Expected result:
 
 ```text
-17 passed
+39 passed
 ```
 
-## Main modules
+Each module is checked against published tables — Anderson's appendices for the
+isentropic, normal-shock and Prandtl–Meyer relations, and NOAA-S/T-76-1562 for
+the four atmosphere layer boundaries. `tests/test_consistency.py` then checks
+the modules against **each other**, which is where the errors a table cannot
+catch appear:
 
-1. U.S. Standard Atmosphere 1976
-2. Isentropic flow
-3. Normal shock
-4. Compressible Pitot measurement
-5. Oblique shock
-6. Prandtl-Meyer expansion
-7. Sequential shock-expansion geometry
+- With θ → 0 the strong oblique-shock branch must reproduce the normal shock,
+  and the weak branch must fade into a Mach wave.
+- `θmax` must match Anderson's detachment values, including the finite `M → ∞`
+  limit of 45.58°.
+- An expansion must be reversible, and `νmax` must equal its closed form —
+  which lands exactly on 90° for a monatomic gas.
+- The shock relations must survive γ ≠ 1.4, since γ is a user-facing parameter.
 
 ## Technical assumptions
 
 - Calorically perfect gas.
-- Default air gas constant: `R = 287.05287 J/(kg K)`.
 - Geometry module: two-dimensional, inviscid, piecewise-linear surface.
 - Attached oblique-shock model unless the solver reports detachment.
-- No boundary-layer interaction or wave-wave interaction.
-- A Pitot shock is a local diagnostic branch and does not alter subsequent external-flow regions.
+- No boundary-layer interaction or wave–wave interaction.
 
-## Standard-atmosphere source
+## Credits
 
-U.S. Standard Atmosphere, 1976, NOAA-S/T-76-1562 and NASA-TM-X-74335.
+Developed at the Universidad Autónoma de Chihuahua (UACH) by Carlos Alberto
+Molina Holguín.
+
+## Sources
+
+- J. D. Anderson, *Modern Compressible Flow*, appendices A, B, and C.
+- U.S. Standard Atmosphere, 1976, NOAA-S/T-76-1562 and NASA-TM-X-74335.
+
+See `DEPLOYMENT.md` for GitHub and Streamlit Community Cloud instructions.

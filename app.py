@@ -31,6 +31,7 @@ from visualization.plots import geometry_figure, pitot_schematic_figure, theta_b
 
 SITE_URL = "https://carlosmh712.github.io/"
 ATMOSPHERE_SOURCE = "https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19770009539.pdf"
+CREDITS = "Carlos Alberto Molina Holguín · UACH"
 LECTURES = {
     "isentropic": f"{SITE_URL}aerodynamics-ii/isentropic-flow.html",
     "normal": f"{SITE_URL}aerodynamics-ii/normal-shocks.html",
@@ -50,12 +51,19 @@ TEXT = {
     "en": {
         "hero_eyebrow": "AERODYNAMICS II · COMPUTATIONAL TOOL",
         "hero_title": "Compressible Flow Calculator",
+        "byline": "by M.C. Carlos Molina",
         "hero_copy": (
             "Standard atmosphere, isentropic flow, shocks, Prandtl–Meyer expansions, "
             "Pitot measurements, and sequential shock–expansion geometry."
         ),
         "global": "Global configuration",
         "gamma": "Specific-heat ratio γ",
+        "r_gas": "Specific gas constant R [J/(kg·K)]",
+        "r_gas_help": (
+            "Air is 287.05287. Change it to run the same relations on another gas — "
+            "helium, argon, or combustion products — remembering to change γ as well."
+        ),
+        "credits": "Credits",
         "decimals": "Displayed decimals",
         "units": "Unit system",
         "pressure_unit": "Pressure unit",
@@ -94,12 +102,19 @@ TEXT = {
     "es": {
         "hero_eyebrow": "AERODINÁMICA II · HERRAMIENTA COMPUTACIONAL",
         "hero_title": "Calculadora de Flujo Compresible",
+        "byline": "por M.C. Carlos Molina",
         "hero_copy": (
             "Atmósfera estándar, flujo isoentrópico, ondas de choque, expansiones de "
             "Prandtl–Meyer, medición Pitot y geometría choque–expansión."
         ),
         "global": "Configuración global",
         "gamma": "Relación de calores específicos γ",
+        "r_gas": "Constante específica del gas R [J/(kg·K)]",
+        "r_gas_help": (
+            "El aire vale 287.05287. Cámbiala para aplicar las mismas relaciones a otro "
+            "gas —helio, argón o productos de combustión— recordando cambiar también γ."
+        ),
+        "credits": "Créditos",
         "decimals": "Decimales mostrados",
         "units": "Sistema de unidades",
         "pressure_unit": "Unidad de presión",
@@ -139,6 +154,17 @@ TEXT = {
 
 
 def inject_css() -> None:
+    """Inyecta la hoja de estilos del portal y fuerza el aspecto claro.
+
+    El bloque final anula el tema oscuro. ``.streamlit/config.toml`` fija
+    ``base = "light"``, pero eso no basta: el navegador del visitante puede
+    pedir esquema oscuro y Streamlit recolorea entonces etiquetas, tablas y
+    campos de entrada por su cuenta.
+
+    No poner comentarios CSS dentro del bloque: Streamlit pasa la cadena por
+    su procesador de markdown, que se come el ``/*`` de apertura y vuelca el
+    resto de la hoja de estilos como texto visible en la página.
+    """
     st.markdown(
         """
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -164,6 +190,8 @@ def inject_css() -> None:
             font-size:clamp(2.5rem,5.4vw,4.7rem); line-height:1; letter-spacing:-.035em; }
         .portal-hero p { max-width:900px; margin:0; color:#d8e9f4; font-size:1.04rem; }
         .portal-eyebrow { color:#9fd6fa; font-size:.73rem; font-weight:700; letter-spacing:.13em; }
+        .hero-byline { margin:-.2rem 0 .8rem; color:#9fd6fa; font-size:.94rem;
+            font-weight:600; letter-spacing:.01em; }
         .hero-chips { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:1.25rem; }
         .hero-chip { padding:.3rem .62rem; border:1px solid rgba(255,255,255,.22); border-radius:999px;
             color:#eaf4fb; background:rgba(255,255,255,.06); font-size:.74rem; font-weight:600; }
@@ -185,11 +213,33 @@ def inject_css() -> None:
         .warning-card { margin:.8rem 0; padding:1rem 1.15rem; border-left:4px solid #d67b28;
             border-radius:0 9px 9px 0; background:#fff7ed; color:#344454; }
         .formula-note { color:#607181; font-size:.9rem; margin-bottom:.5rem; }
+        .credits { color:#344454; font-size:.84rem; line-height:1.55; margin:.2rem 0 0; }
         div.stButton > button, div.stDownloadButton > button, a[data-testid="stLinkButton"] {
             border-radius:8px !important; border:1px solid #d8e2ea !important; font-weight:700 !important; }
         div.stDownloadButton > button { color:white !important; background:#d67b28 !important; border-color:#d67b28 !important; }
         [data-testid="stDataFrame"] { border:1px solid #d8e2ea; border-radius:12px; overflow:hidden; }
         @media (max-width:700px) { .portal-hero { padding:1.55rem 1.3rem; } .portal-hero h1 { font-size:2.55rem; } }
+
+        :root, [data-testid="stApp"] { color-scheme: light !important; }
+        [data-testid="stAppViewContainer"], [data-testid="stSidebar"],
+        [data-testid="stSidebarContent"], [data-testid="stHeader"] {
+            color:#172333 !important; }
+        [data-testid="stWidgetLabel"], [data-testid="stWidgetLabel"] *,
+        [data-testid="stExpander"] summary, [data-testid="stExpander"] summary *,
+        [data-testid="stCaptionContainer"], label, .stRadio div, .stSlider label {
+            color:#172333 !important; }
+        [data-testid="stMetricDelta"], [data-testid="stMetricDelta"] * {
+            color:#344454 !important; }
+        [data-testid="stDataFrame"], [data-baseweb="select"] > div,
+        [data-baseweb="popover"] div, [data-testid="stExpanderDetails"] {
+            background-color:#ffffff !important; color:#172333 !important; }
+        [data-testid="stAlertContainer"] { color:#344454 !important; }
+        [data-testid="stNumberInputField"], [data-baseweb="input"] input {
+            background-color:#ffffff !important; color:#172333 !important; }
+        .portal-hero h1, .portal-hero .hero-chip { color:#ffffff !important; }
+        .portal-hero p { color:#d8e9f4 !important; }
+        .hero-byline { color:#9fd6fa !important; }
+        .portal-eyebrow { color:#9fd6fa !important; }
         </style>
         """,
         unsafe_allow_html=True,
@@ -225,9 +275,9 @@ def temperature_input(label: str, default_k: float, key: str, temperature_unit: 
     return temperature_to_k(value, temperature_unit)
 
 
-def state_metrics(p_pa: float, t_k: float, gamma: float, pressure_unit: str, temperature_unit: str, density_unit: str, speed_unit: str) -> list[tuple[str, float | str, str | None]]:
-    rho = p_pa / (R_AIR * t_k)
-    a = math.sqrt(gamma * R_AIR * t_k)
+def state_metrics(p_pa: float, t_k: float, gamma: float, r_gas: float, pressure_unit: str, temperature_unit: str, density_unit: str, speed_unit: str) -> list[tuple[str, float | str, str | None]]:
+    rho = p_pa / (r_gas * t_k)
+    a = math.sqrt(gamma * r_gas * t_k)
     return [
         (f"p [{pressure_unit}]", pressure_from_pa(p_pa, pressure_unit), None),
         (f"T [{temperature_unit}]", temperature_from_k(t_k, temperature_unit), None),
@@ -236,7 +286,7 @@ def state_metrics(p_pa: float, t_k: float, gamma: float, pressure_unit: str, tem
     ]
 
 
-def localized_region_table(df: pd.DataFrame, language: str, branch: str, pressure_unit: str, temperature_unit: str, density_unit: str) -> pd.DataFrame:
+def localized_region_table(df: pd.DataFrame, language: str, branch: str, r_gas: float, pressure_unit: str, temperature_unit: str, density_unit: str) -> pd.DataFrame:
     text = TEXT[language]
     result = df.copy()
     result["Path"] = result["path_code"].map({"main_flow": text["main_flow"], "pitot_branch": text["pitot_branch"]})
@@ -245,7 +295,7 @@ def localized_region_table(df: pd.DataFrame, language: str, branch: str, pressur
     result.loc[result["event_code"] == "oblique_shock", "Event"] += f" · {branch_name}"
     result[f"p [{pressure_unit}]"] = result["pressure_pa"].map(lambda v: pressure_from_pa(v, pressure_unit))
     result[f"T [{temperature_unit}]"] = result["temperature_k"].map(lambda v: temperature_from_k(v, temperature_unit))
-    density_si = result["pressure_pa"] / (R_AIR * result["temperature_k"])
+    density_si = result["pressure_pa"] / (r_gas * result["temperature_k"])
     result[f"ρ [{density_unit}]"] = density_si.map(lambda v: density_from_kg_m3(v, density_unit))
     result = result.rename(columns={
         "region": "Region", "turn_deg": "Turn [deg]", "mach": "M",
@@ -259,7 +309,7 @@ def localized_region_table(df: pd.DataFrame, language: str, branch: str, pressur
 
 def display_state_table(df: pd.DataFrame, decimals: int, pressure_unit: str, temperature_unit: str, density_unit: str) -> None:
     columns = ["Region", "Path", "Event", "Turn [deg]", "M", "p/p∞", f"p [{pressure_unit}]", "T/T∞", f"T [{temperature_unit}]", "ρ/ρ∞", f"ρ [{density_unit}]", "p₀/p₀∞", "Cₚ"]
-    st.dataframe(df[columns], use_container_width=True, hide_index=True, column_config={
+    st.dataframe(df[columns], width="stretch", hide_index=True, column_config={
         col: st.column_config.NumberColumn(format=f"%.{decimals}f")
         for col in columns if col not in {"Region", "Path", "Event"}
     })
@@ -267,7 +317,7 @@ def display_state_table(df: pd.DataFrame, decimals: int, pressure_unit: str, tem
 
 def display_wave_table(df: pd.DataFrame, decimals: int) -> None:
     columns = ["Region", "Event", "Turn [deg]", "β [deg]", "Mₙ₁", "Mₙ₂", "μ₁ [deg]", "μ₂ [deg]", "Branch"]
-    st.dataframe(df[columns], use_container_width=True, hide_index=True, column_config={
+    st.dataframe(df[columns], width="stretch", hide_index=True, column_config={
         col: st.column_config.NumberColumn(format=f"%.{decimals}f")
         for col in columns if col not in {"Region", "Event", "Branch"}
     })
@@ -343,23 +393,31 @@ with st.sidebar:
     temperature_unit = st.selectbox(text["temperature_unit"], temperature_options, index=0)
     altitude_unit = st.selectbox(text["altitude_unit"], altitude_options, index=0)
     gamma = st.number_input(text["gamma"], min_value=1.01, max_value=2.0, value=1.4, step=0.01, format="%.4f")
+    r_gas = st.number_input(
+        text["r_gas"], min_value=20.0, max_value=4200.0, value=R_AIR,
+        step=0.00001, format="%.5f", help=text["r_gas_help"],
+    )
     decimals = st.slider(text["decimals"], 3, 7, 5)
     st.info(text["assumptions"])
 
     st.markdown(f"### {text['resources']}")
-    st.link_button(text["website"], SITE_URL, use_container_width=True)
-    st.link_button(text["course"], f"{SITE_URL}aerodynamics-ii/", use_container_width=True)
+    st.link_button(text["website"], SITE_URL, width="stretch")
+    st.link_button(text["course"], f"{SITE_URL}aerodynamics-ii/", width="stretch")
+    st.markdown(f"### {text['credits']}")
+    st.markdown(f'<p class="credits">{CREDITS}</p>', unsafe_allow_html=True)
 
 st.markdown(
     f"""
     <div class="portal-hero">
       <div class="portal-eyebrow">{text['hero_eyebrow']}</div>
       <h1>{text['hero_title']}</h1>
+      <div class="hero-byline">{text['byline']}</div>
       <p>{text['hero_copy']}</p>
       <div class="hero-chips">
         <span class="hero-chip">U.S. Standard Atmosphere 1976</span>
         <span class="hero-chip">{unit_system}</span>
         <span class="hero-chip">γ = {gamma:.4g}</span>
+        <span class="hero-chip">R = {r_gas:.5g}</span>
         <span class="hero-chip">Python · Streamlit</span>
       </div>
     </div>
@@ -403,6 +461,16 @@ with tabs[0]:
             st.latex(r"\frac{p}{p_b}=\left(\frac{T_b}{T}\right)^{g_0/(RL_b)}\quad (L_b\ne0)")
             st.latex(r"\frac{p}{p_b}=\exp\left[-\frac{g_0(H-H_b)}{RT_b}\right]\quad (L_b=0)")
             st.latex(r"\rho=\frac{p}{RT},\qquad a=\sqrt{\gamma RT}")
+        st.markdown(
+            '<div class="info-card">This tab always uses <strong>R = 287.05287 J/(kg·K)</strong>, '
+            'whatever the sidebar says. That value is part of the definition of the 1976 standard, '
+            'not a property of the air being modelled, so changing it would not generalise the model '
+            '— it would contradict it. The sidebar R applies to the flow modules.<br>'
+            'Esta pestaña usa siempre <strong>R = 287.05287 J/(kg·K)</strong>, diga lo que diga la barra lateral. '
+            'Ese valor forma parte de la definición de la norma de 1976, así que cambiarlo no generalizaría '
+            'el modelo: lo contradiría. La R de la barra lateral aplica a los módulos de flujo.</div>',
+            unsafe_allow_html=True,
+        )
         st.link_button("NASA/NOAA source", ATMOSPHERE_SOURCE)
     except ValueError as exc:
         st.error(str(exc))
@@ -465,7 +533,7 @@ with tabs[2]:
     try:
         result = normal_shock_relations(mach1, gamma)
         p2, t2 = p1 * result.p2_over_p1, t1 * result.t2_over_t1
-        rho1 = p1 / (R_AIR * t1)
+        rho1 = p1 / (r_gas * t1)
         rho2 = rho1 * result.rho2_over_rho1
         metric_grid([
             ("M₂", result.mach2, None), ("p₂/p₁", result.p2_over_p1, None),
@@ -474,7 +542,7 @@ with tabs[2]:
             ("Δs/R", result.entropy_change_over_r, None), ("T₀₂/T₀₁", 1.0, None),
         ], decimals)
         st.markdown("#### Downstream state / Estado aguas abajo")
-        metric_grid(state_metrics(p2, t2, gamma, pressure_unit, temperature_unit, density_unit, speed_unit), decimals)
+        metric_grid(state_metrics(p2, t2, gamma, r_gas, pressure_unit, temperature_unit, density_unit, speed_unit), decimals)
         st.caption(f"ρ₁ = {density_from_kg_m3(rho1, density_unit):.{decimals}f} {density_unit} · ρ₂ = {density_from_kg_m3(rho2, density_unit):.{decimals}f} {density_unit}")
         st.markdown('<div class="info-card">The Pitot calculation has been separated into its own module so that the post-shock static state is not confused with the pressure measured by a probe.</div>', unsafe_allow_html=True)
         with st.expander("Key equations / Fórmulas clave"):
@@ -529,8 +597,8 @@ with tabs[3]:
         table = pd.DataFrame(rows, columns=["State", "Event", "M", "p_pa", "T_k", "p0_over_p1"])
         table[f"p [{pressure_unit}]"] = table["p_pa"].map(lambda value: pressure_from_pa(value, pressure_unit))
         table[f"T [{temperature_unit}]"] = table["T_k"].map(lambda value: temperature_from_k(value, temperature_unit))
-        table[f"ρ [{density_unit}]"] = (table["p_pa"] / (R_AIR * table["T_k"])).map(lambda value: density_from_kg_m3(value, density_unit))
-        st.dataframe(table[["State", "Event", "M", f"p [{pressure_unit}]", f"T [{temperature_unit}]", f"ρ [{density_unit}]", "p0_over_p1"]], use_container_width=True, hide_index=True)
+        table[f"ρ [{density_unit}]"] = (table["p_pa"] / (r_gas * table["T_k"])).map(lambda value: density_from_kg_m3(value, density_unit))
+        st.dataframe(table[["State", "Event", "M", f"p [{pressure_unit}]", f"T [{temperature_unit}]", f"ρ [{density_unit}]", "p0_over_p1"]], width="stretch", hide_index=True)
         st.markdown('<div class="warning-card"><strong>p₂ is not the Pitot reading.</strong> In supersonic flow the probe measures p₀₂ after the local normal shock and the final isentropic deceleration.</div>', unsafe_allow_html=True)
         with st.expander("Key equations / Fórmulas clave"):
             equations_pitot()
@@ -566,9 +634,9 @@ with tabs[4]:
         ], decimals)
         p2, t2 = oblique_p1 * result.p2_over_p1, oblique_t1 * result.t2_over_t1
         st.markdown("#### Downstream state / Estado aguas abajo")
-        metric_grid(state_metrics(p2, t2, gamma, pressure_unit, temperature_unit, density_unit, speed_unit), decimals)
+        metric_grid(state_metrics(p2, t2, gamma, r_gas, pressure_unit, temperature_unit, density_unit, speed_unit), decimals)
         st.markdown("#### θ–β–M chart / Diagrama θ–β–M")
-        st.plotly_chart(theta_beta_m_figure(oblique_mach, gamma, selected_beta_deg=result.beta_deg, selected_theta_deg=theta), use_container_width=True)
+        st.plotly_chart(theta_beta_m_figure(oblique_mach, gamma, selected_beta_deg=result.beta_deg, selected_theta_deg=theta), width="stretch")
         with st.expander("Key equations / Fórmulas clave"):
             equations_oblique()
         st.link_button(text["theory"], LECTURES["oblique"])
@@ -607,7 +675,7 @@ with tabs[5]:
             ], decimals)
             p2, t2 = pm_p1 * result.p2_over_p1, pm_t1 * result.t2_over_t1
             st.markdown("#### Downstream state / Estado aguas abajo")
-            metric_grid(state_metrics(p2, t2, gamma, pressure_unit, temperature_unit, density_unit, speed_unit), decimals)
+            metric_grid(state_metrics(p2, t2, gamma, r_gas, pressure_unit, temperature_unit, density_unit, speed_unit), decimals)
             st.markdown('<div class="info-card">The property ratios are obtained from the same isentropic total–static relations evaluated at M₁ and M₂. Because T₀ and p₀ are constant through the fan, their quotient gives T₂/T₁, p₂/p₁, and ρ₂/ρ₁.</div>', unsafe_allow_html=True)
         else:
             nu_target = st.number_input("ν [deg]", min_value=0.0, value=26.3798, step=0.001, format="%.6f", key="nu_target_v3")
@@ -643,7 +711,7 @@ with tabs[6]:
         default_mach, default_side = 2.5, side_options[0]
 
     st.caption("length = panel length; angle_deg = absolute panel inclination. The first panel is compared with the horizontal freestream.")
-    geometry_df = st.data_editor(default_df, num_rows="dynamic", use_container_width=True, key=f"geometry_editor_v3_{language}_{idx}", column_config={
+    geometry_df = st.data_editor(default_df, num_rows="dynamic", width="stretch", key=f"geometry_editor_v3_{language}_{idx}", column_config={
         "length": st.column_config.NumberColumn("Length / Longitud", min_value=0.001, format="%.6f"),
         "angle_deg": st.column_config.NumberColumn("Panel angle [deg] / Inclinación", format="%.6f"),
     })
@@ -682,9 +750,9 @@ with tabs[6]:
         ], decimals)
 
         st.markdown("#### Geometry and external waves / Geometría y ondas externas")
-        st.plotly_chart(geometry_figure(vertices, waves, pitot_segment=pitot_segment, pitot_data=pitot_data), use_container_width=True)
+        st.plotly_chart(geometry_figure(vertices, waves, pitot_segment=pitot_segment, pitot_data=pitot_data), width="stretch")
 
-        display_df = localized_region_table(region_df, language, geometry_branch, pressure_unit, temperature_unit, density_unit)
+        display_df = localized_region_table(region_df, language, geometry_branch, r_gas, pressure_unit, temperature_unit, density_unit)
         result_view = st.radio("Results view / Vista de resultados", ["State table / Estados", "Wave details / Ondas"], horizontal=True)
         if result_view.startswith("State"):
             display_state_table(display_df, decimals, pressure_unit, temperature_unit, density_unit)
@@ -694,7 +762,7 @@ with tabs[6]:
         if pitot_data:
             st.markdown('<div class="warning-card"><strong>Local diagnostic branch.</strong> The probe samples the selected region; its normal shock does not alter the external state propagated to later panels.</div>', unsafe_allow_html=True)
             st.markdown(f"#### Pitot diagnostic in R{pitot_data['source_region']}")
-            st.plotly_chart(pitot_schematic_figure(pitot_data), use_container_width=True)
+            st.plotly_chart(pitot_schematic_figure(pitot_data), width="stretch")
             pitot_metrics = [
                 ("Local M₁", float(pitot_data["mach1"]), None),
                 (f"Measured p [{pressure_unit}]", pressure_from_pa(float(pitot_data["p_measured_pa"]), pressure_unit), None),
@@ -718,8 +786,8 @@ with tabs[6]:
         full_csv = region_df.to_csv(index=False).encode("utf-8")
         raw_csv = surface_df.to_csv(index=False).encode("utf-8")
         d1, d2, _ = st.columns([1, 1, 2])
-        d1.download_button(text["download"], data=full_csv, file_name="shock_expansion_region_table.csv", mime="text/csv", use_container_width=True)
-        d2.download_button("Raw surface states CSV", data=raw_csv, file_name="surface_states.csv", mime="text/csv", use_container_width=True)
+        d1.download_button(text["download"], data=full_csv, file_name="shock_expansion_region_table.csv", mime="text/csv", width="stretch")
+        d2.download_button("Raw surface states CSV", data=raw_csv, file_name="surface_states.csv", mime="text/csv", width="stretch")
         st.link_button(text["theory"], LECTURES["geometry"])
 
         if (surface_df["event_code"] == "detached_shock").any():

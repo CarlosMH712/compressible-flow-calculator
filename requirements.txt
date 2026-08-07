@@ -1,4 +1,4 @@
-streamlit>=1.35,<2
+streamlit>=1.49,<2  # width='stretch' sustituye a use_container_width
 numpy>=1.26
 scipy>=1.13
 pandas>=2.2
